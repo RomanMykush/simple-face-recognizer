@@ -27,9 +27,10 @@ def create_recognizer(data, input):
     raise ValueError('Invalid file format passed as argument')
 
 if __name__ == '__main__':
+    # get known face encodings data
     with open(args["encodings"], "r") as read_file:
         data = json.load(read_file)
-    
+    # start face recognition in file (or stream)
     fr = create_recognizer(data, args["input"])
     print("Running face recognizer...")
     fr.run_recognition(args["input"])

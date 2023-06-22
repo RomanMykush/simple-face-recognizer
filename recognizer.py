@@ -4,8 +4,8 @@ import numpy as np
 import threading
 
 def RecognizeFace(data, frame, det_method="hog"):
-    # detecting faces
     rgb = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
+    # detecting faces
     boxes = face_recognition.face_locations(rgb, model=det_method)
     encodings = face_recognition.face_encodings(rgb, boxes)
     
@@ -15,11 +15,10 @@ def RecognizeFace(data, frame, det_method="hog"):
     for i in range(len(encodings)):
         for key, value in data.items():
             matches = face_recognition.compare_faces(np.asarray(value["encoding"]), encodings[i])
-
             distances = face_recognition.face_distance(np.asarray(value["encoding"]), encodings[i])
-            
-            best_match_index = np.argmin(distances)
 
+            best_match_index = np.argmin(distances)
+            # storing best matches with smallest differences
             if matches[best_match_index] and distances[best_match_index] < (1 - confidences[i]):
                 names[i] = value["name"]
                 confidences[i] = distances[best_match_index]
@@ -68,10 +67,13 @@ class VideoFaceRecognizer:
             if not ret:
                 print("Can't receive frame (stream end?). Exiting ...")
                 break
-
+            
+            # check if encode_thread has finished its job
             if not self.encode_thread.is_alive():
+                # storing thread results
                 self.last_boxes = self.buffer_boxes
                 self.last_names = self.buffer_names
+                # creating and starting new thread
                 self.encode_thread = threading.Thread(target=self.run_encode_thread, args=[frame])
                 self.encode_thread.start()
             
